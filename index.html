@@ -5,15 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Snake & Ladder Game</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Snake & Ladder Game</h1>
-    <div id="game-container">
-        <div id="board"></div>
-        <div id="controls">
-            <button id="roll-dice">Roll Dice</button>
-            <div id="dice-result">Roll: -</div>
-            <div id="player-position">Player Position: 1</div>
+    <div class="game-wrapper">
+        <header>
+            <h1>Snake & Ladder Game</h1>
+            <div class="game-info">
+                <div class="player-turn">
+                    <i class="fas fa-user"></i>
+                    <span>Player 1's Turn</span>
+                </div>
+                <div class="game-stats">
+                    <div class="stat">
+                        <i class="fas fa-dice"></i>
+                        <span>Rolls: 0</span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-clock"></i>
+                        <span>Time: 00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="game-container">
+            <div id="board"></div>
+            
+            <div class="game-controls">
+                <div class="dice-container">
+                    <div class="dice">
+                        <div class="dice-face">
+                            <span class="dot"></span>
+                        </div>
+                    </div>
+                    <button id="roll-dice" class="btn-primary">
+                        <i class="fas fa-dice"></i>
+                        Roll Dice
+                    </button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-secondary">
+                        <i class="fas fa-redo"></i>
+                        Restart
+                    </button>
+                    <button class="btn-secondary">
+                        <i class="fas fa-pause"></i>
+                        Pause
+                    </button>
+                    <button class="btn-secondary">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </button>
+                </div>
+
+                <div class="game-status">
+                    <div class="status-card">
+                        <h3>Current Position</h3>
+                        <div class="position">1</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Last Roll</h3>
+                        <div class="roll">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-rules">
+            <h2>Game Rules</h2>
+            <ul>
+                <li><i class="fas fa-arrow-up"></i> Climb up ladders to advance</li>
+                <li><i class="fas fa-arrow-down"></i> Slide down snakes to go back</li>
+                <li><i class="fas fa-dice"></i> Roll the dice to move</li>
+                <li><i class="fas fa-flag"></i> Reach 100 to win!</li>
+            </ul>
         </div>
     </div>
     <script src="script.js"></script>
