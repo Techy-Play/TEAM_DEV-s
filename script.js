@@ -79,58 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Player movement animation
-    function updatePlayerPosition(oldPos, newPos) {
-        try {
-            const oldCell = board.querySelector(`[data-position="${oldPos}"]`);
-            const newCell = board.querySelector(`[data-position="${newPos}"]`);
-
-            if (oldCell) oldCell.classList.remove('player');
-            
-            if (newCell) {
-                const token = document.createElement('div');
-                token.className = 'player-token';
-                document.body.appendChild(token);
-
-                const oldRect = oldCell.getBoundingClientRect();
-                const newRect = newCell.getBoundingClientRect();
-
-                token.style.left = `${oldRect.left + oldRect.width/2}px`;
-                token.style.top = `${oldRect.top + oldRect.height/2}px`;
-                token.style.transform = 'translate(-50%, -50%)';
-
-                const animation = token.animate([
-                    { 
-                        left: `${oldRect.left + oldRect.width/2}px`,
-                        top: `${oldRect.top + oldRect.height/2}px`
-                    },
-                    { 
-                        left: `${newRect.left + newRect.width/2}px`,
-                        top: `${newRect.top + newRect.height/2}px`
-                    }
-                ], {
-                    duration: 600,
-                    easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-                });
-
-                animation.onfinish = () => {
-                    token.remove();
-                    newCell.classList.add('player');
-                    isAnimating = false;
-
-                    if (specialMoves[newPos]) {
-                        setTimeout(() => {
-                            movePlayer(newPos, specialMoves[newPos], true);
-                        }, 500);
-                    } else if (!isAnimating) {
-                        rollButton.disabled = false;
-                    }
-                };
-            }
-        } catch (error) {
-            console.error('Error in updatePlayerPosition:', error);
-            isAnimating = false;
-            rollButton.disabled = false;
+    // Update player position
+    function updatePlayerPosition(newPos) {
+        const cells = board.querySelectorAll('.cell');
+        cells.forEach(cell => cell.classList.remove('player'));
+        
+        const newCell = board.querySelector(`[data-position="${newPos}"]`);
+        if (newCell) {
+            newCell.classList.add('player');
         }
     }
 
@@ -138,9 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function movePlayer(from, to, isSpecialMove = false) {
         try {
             isAnimating = true;
-            updatePlayerPosition(from, to);
             currentPosition = to;
             positionDisplay.textContent = to;
+            updatePlayerPosition(to);
 
             if (to === 100) {
                 setTimeout(() => {
@@ -151,10 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         rollButton.disabled = true;
                     }
                 }, 500);
-            } else if (!isSpecialMove) {
+            } else if (specialMoves[to] && !isSpecialMove) {
                 setTimeout(() => {
+                    movePlayer(to, specialMoves[to], true);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    isAnimating = false;
                     rollButton.disabled = false;
-                }, 600);
+                }, 500);
             }
         } catch (error) {
             console.error('Error in movePlayer:', error);
@@ -194,11 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
             positionDisplay.textContent = '1';
             diceResult.textContent = '0';
             rollButton.disabled = false;
+            isAnimating = false;
             
-            const currentCell = board.querySelector('.player');
-            if (currentCell) currentCell.classList.remove('player');
-            
-            updatePlayerPosition(0, 1);
+            updatePlayerPosition(1);
             updateDiceFace(1);
         }
     }
@@ -262,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize game
     createBoard();
-    updatePlayerPosition(0, 1);
+    updatePlayerPosition(1);
     updateDiceFace(1);
     
     // Event listeners
