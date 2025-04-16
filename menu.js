@@ -34,8 +34,7 @@ class GameMenu {
             this.createGameModeScreen();
         });
     }
-
-    createGameModeScreen() {
+createGameModeScreen() {
         this.menuContainer.innerHTML = `
             <div class="menu-screen game-mode-screen">
                 <h2>Select Game Mode</h2>
@@ -43,8 +42,8 @@ class GameMenu {
                     <button class="mode-btn" data-mode="bot">
                         <i class="fas fa-robot"></i> Play with Bot
                     </button>
-                    <button class="mode-btn" data-mode="player">
-                        <i class="fas fa-user-friends"></i> Play with Friend
+                    <button class="mode-btn" data-mode="player" >
+                        <i class="fas fa-user-friends"></i> Play with Friend <i>(WORK IN PROGRESS)</i>
                     </button>
                 </div>
                 <button class="back-btn">
@@ -68,7 +67,9 @@ class GameMenu {
             this.createStartScreen();
         });
     }
-
+    
+// This still have some errors --__--
+    
     createPlayerNameScreen() {
         this.menuContainer.innerHTML = `
             <div class="menu-screen player-name-screen">
