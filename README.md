@@ -1,4 +1,4 @@
-# TEAM_DEV-s
+# TEAM_AMP_DEV-s
 This repository is created for the elimination round of GEHU Bhimtal's Hackathon .
 
 # Snakes and Ladders Game
@@ -7,7 +7,7 @@ A classic Snakes and Ladders board game implemented with JavaScript, HTML, and C
 
 ## 🎮 Game Features
 
-- **Multiple Game Modes**:
+- **Multiple Game Modes _(Still some bugs to figure OUT)_**:
   - Single-player mode against AI bots
   - Multiplayer mode for playing with friends (2-4 players)
   - Difficulty settings (easy, medium, hard) that affect the number of bot players
@@ -28,7 +28,7 @@ A classic Snakes and Ladders board game implemented with JavaScript, HTML, and C
 ## 🎲 How to Play
 
 1. **Start the Game**:
-   - Select game mode [ single player or **with friends{Work in progress}** ]
+   - Select game mode [ single player or **with friends, Work in progress** ]
    - Enter player names
    - Choose difficulty level (for single player mode)
 
@@ -55,6 +55,9 @@ A classic Snakes and Ladders board game implemented with JavaScript, HTML, and C
 2. Open `index.html` in your browser to play the game.
 
 3. No additional dependencies or installation required!
+- ### OR
+1. open this [link](https://techy-play.github.io/TEAM_DEV-s/) to play directly
+---
 
 ## 🧩 Project Structure
 
