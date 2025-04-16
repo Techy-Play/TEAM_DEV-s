@@ -65,6 +65,7 @@ h1 {
     align-items: center;
     background: url('assets/body-backgroung.jpg') center/cover;
     padding: 1rem;
+    flex-direction: row;
     border-radius: 10px;
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
@@ -508,6 +509,7 @@ h1 {
     .game-info {
         flex-direction: column;
         gap: 1rem;
+        
     }
 
     #board {
@@ -739,10 +741,10 @@ h1 {
 /* Player Info Panel Styles */
 .player-info-panel {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
     order: 1;
-    width: 220px;
+    width: 550px;
 }
 
 .player-card {
@@ -820,6 +822,9 @@ h1 {
     padding: 8px 12px;
     border-radius: 8px;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: row;
+
 }
 
 .player-turn span {
