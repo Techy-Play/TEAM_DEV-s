@@ -10,6 +10,8 @@ class Game {
         this.isGameOver = false;
         this.gameWrapper = document.querySelector('.game-wrapper');
         this.rollCount = 0;
+        this.menu = options.menu; // Reference to the menu
+        this.playerStats = []; // Track stats for each player
     }
 
     init() {
@@ -19,9 +21,22 @@ class Game {
         this.setupUI();
         this.bindEvents();
         this.updateUI();
+        this.updateAllPlayerTokens();
         
         // Show the game wrapper
         this.gameWrapper.style.display = 'block';
+
+        // Initialize player stats
+        this.players.forEach(player => {
+            this.playerStats.push({
+                name: player.name,
+                position: 1,
+                lastRoll: 0
+            });
+        });
+
+        // Create player info panel
+        this.createPlayerInfoPanel();
     }
 
     createPlayers() {
@@ -36,6 +51,129 @@ class Game {
                 new Player(this.playerNames[1] || 'Player 2', 'player')
             ];
         }
+    }
+
+    createPlayerInfoPanel() {
+        const gameInfo = document.querySelector('.game-info');
+        if (!gameInfo) return;
+
+        // Clear existing player info
+        const existingPanel = document.querySelector('.player-info-panel');
+        if (existingPanel) existingPanel.remove();
+
+        // Create new player info panel
+        const playerInfoPanel = document.createElement('div');
+        playerInfoPanel.className = 'player-info-panel';
+        
+        this.players.forEach((player, index) => {
+            const playerCard = document.createElement('div');
+            playerCard.className = `player-card ${index === this.currentPlayer ? 'active' : ''}`;
+            playerCard.style.borderColor = player.color;
+            
+            playerCard.innerHTML = `
+                <div class="player-card-header" style="background-color: ${player.color}">
+                    <span class="player-name">${player.name}</span>
+                    ${index === this.currentPlayer ? '<span class="current-turn-badge">Current Turn</span>' : ''}
+                </div>
+                <div class="player-card-body">
+                    <div class="player-stat">
+                        <span class="stat-label">Position:</span>
+                        <span class="stat-value position-value">${player.position}</span>
+                    </div>
+                    <div class="player-stat">
+                        <span class="stat-label">Last Roll:</span>
+                        <span class="stat-value roll-value">${this.playerStats[index]?.lastRoll || '-'}</span>
+                    </div>
+                </div>
+            `;
+            
+            playerInfoPanel.appendChild(playerCard);
+        });
+        
+        gameInfo.appendChild(playerInfoPanel);
+        
+        // Create simplified status display next to dice
+        this.createSimplifiedStatusDisplay();
+    }
+    
+    createSimplifiedStatusDisplay() {
+        const diceContainer = document.querySelector('.dice-container');
+        if (!diceContainer) return;
+        
+        // Remove existing status display if it exists
+        const existingStatus = document.querySelector('.player-status-display');
+        if (existingStatus) existingStatus.remove();
+        
+        const currentPlayer = this.players[this.currentPlayer];
+        
+        // Create new status display
+        const statusDisplay = document.createElement('div');
+        statusDisplay.className = 'player-status-display';
+        
+        statusDisplay.innerHTML = `
+            <div class="player-turn-indicator" style="background-color: ${currentPlayer.color}">
+                <div class="player-avatar">
+                    <span>P</span>
+                </div>
+                <span class="player-turn-name">${currentPlayer.name}'s Turn</span>
+            </div>
+            <div class="status-cards">
+                <div class="status-card position-card">
+                    <h3>Current Position</h3>
+                    <div class="status-value">${currentPlayer.position}</div>
+                </div>
+                <div class="status-card roll-card">
+                    <h3>Last Roll</h3>
+                    <div class="status-value">${this.playerStats[this.currentPlayer]?.lastRoll || '-'}</div>
+                </div>
+            </div>
+        `;
+        
+        diceContainer.insertBefore(statusDisplay, diceContainer.firstChild);
+    }
+
+    updatePlayerInfoPanel() {
+        const playerCards = document.querySelectorAll('.player-card');
+        playerCards.forEach((card, index) => {
+            const positionValue = card.querySelector('.position-value');
+            const rollValue = card.querySelector('.roll-value');
+            
+            if (positionValue) {
+                positionValue.textContent = this.players[index].position;
+            }
+            
+            if (rollValue) {
+                rollValue.textContent = this.playerStats[index].lastRoll || '-';
+            }
+        });
+        
+        // Update simplified status display as well
+        this.updateSimplifiedStatusDisplay();
+    }
+    
+    updateSimplifiedStatusDisplay() {
+        const statusDisplay = document.querySelector('.player-status-display');
+        if (!statusDisplay) return;
+        
+        const currentPlayer = this.players[this.currentPlayer];
+        
+        // Update player name and color
+        const turnIndicator = statusDisplay.querySelector('.player-turn-indicator');
+        const playerAvatar = statusDisplay.querySelector('.player-avatar');
+        const playerTurnName = statusDisplay.querySelector('.player-turn-name');
+        
+        if (turnIndicator) turnIndicator.style.backgroundColor = currentPlayer.color;
+        if (playerAvatar) {
+            playerAvatar.innerHTML = '<span>P</span>';
+        }
+        if (playerTurnName) playerTurnName.textContent = `${currentPlayer.name}'s Turn`;
+        
+        // Update position and roll values
+        const positionValue = statusDisplay.querySelector('.position-card .status-value');
+        const rollValue = statusDisplay.querySelector('.roll-card .status-value');
+        
+        if (positionValue) positionValue.textContent = currentPlayer.position;
+        if (rollValue) rollValue.textContent = this.playerStats[this.currentPlayer]?.lastRoll || '-';
     }
 
     setupUI() {
@@ -76,6 +214,8 @@ class Game {
         const playerTurn = document.querySelector('.player-turn span');
         if (playerTurn) {
             playerTurn.textContent = `${this.players[this.currentPlayer].name}'s Turn`;
+            playerTurn.style.color = this.players[this.currentPlayer].color;
+            playerTurn.style.fontWeight = 'bold';
         }
 
         // Setup dice face
@@ -83,13 +223,35 @@ class Game {
         if (diceFace) {
             diceFace.innerHTML = this.dice.renderDots(1);
         }
+        
+        // Restructure the game controls to put status cards on the left of dice
+        const gameControls = document.querySelector('.game-controls');
+        if (gameControls) {
+            gameControls.classList.add('game-controls-flex');
+            
+            // Hide Roll Dice button as we'll make the dice clickable
+            const rollButton = document.getElementById('roll-dice');
+            if (rollButton) {
+                rollButton.style.display = 'none';
+            }
+            
+            // Add a click hint to the dice
+            const diceContainer = document.querySelector('.dice-container');
+            if (diceContainer) {
+                const clickHint = document.createElement('div');
+                clickHint.className = 'dice-click-hint';
+                clickHint.textContent = 'Click to roll';
+                diceContainer.appendChild(clickHint);
+            }
+        }
     }
 
     bindEvents() {
-        // Bind roll dice button
-        const rollButton = document.getElementById('roll-dice');
-        if (rollButton) {
-            rollButton.addEventListener('click', () => this.handleRoll());
+        // Make dice clickable
+        const dice = document.querySelector('.dice');
+        if (dice) {
+            dice.classList.add('clickable');
+            dice.addEventListener('click', () => this.handleRoll());
         }
 
         // Bind restart button
@@ -97,18 +259,44 @@ class Game {
         if (restartButton) {
             restartButton.addEventListener('click', () => this.resetGame());
         }
+
+        // Bind home button
+        const homeButton = document.getElementById('home');
+        if (homeButton) {
+            homeButton.addEventListener('click', () => this.goHome());
+        }
+    }
+
+    goHome() {
+        if (confirm('Are you sure you want to return to the home screen? Your current game progress will be lost.')) {
+            // Hide game wrapper
+            this.gameWrapper.style.display = 'none';
+            
+            // Restart the menu
+            if (this.menu) {
+                this.menu.menuContainer.style.display = 'flex';
+                this.menu.createStartScreen();
+            } else {
+                // Create a new menu if reference doesn't exist
+                const menu = new GameMenu();
+                menu.init();
+            }
+        }
     }
 
     async handleRoll() {
-        if (this.isGameOver) return;
+        if (this.isGameOver || this.dice.isRolling) return;
 
-        const rollButton = document.getElementById('roll-dice');
-        if (rollButton) {
-            rollButton.disabled = true;
+        const dice = document.querySelector('.dice');
+        if (dice) {
+            dice.classList.add('disabled');
         }
 
         const roll = await this.dice.roll();
         const currentPlayer = this.players[this.currentPlayer];
+        
+        // Update player stats
+        this.playerStats[this.currentPlayer].lastRoll = roll;
         
         // Update roll display
         const rollDisplay = document.querySelector('.roll');
@@ -130,6 +318,54 @@ class Game {
         }
     }
 
+    updatePlayerPosition(player) {
+        const cells = document.querySelectorAll('.cell');
+        
+        // Only remove this specific player's class
+        cells.forEach(cell => {
+            cell.classList.remove(`player-${player.name.replace(/\s+/g, '-').toLowerCase()}`);
+        });
+        
+        const newCell = document.querySelector(`[data-position="${player.position}"]`);
+        if (newCell) {
+            newCell.classList.add(`player-${player.name.replace(/\s+/g, '-').toLowerCase()}`);
+        }
+        
+        // Update all player tokens display with a refreshed view
+        this.updateAllPlayerTokens();
+    }
+    
+    updateAllPlayerTokens() {
+        // First, clear all token markers
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            // Remove any existing token elements
+            const existingTokens = cell.querySelectorAll('.player-token');
+            existingTokens.forEach(token => token.remove());
+        });
+        
+        // Then add tokens for all players at their current positions
+        this.players.forEach((player, index) => {
+            const cell = document.querySelector(`[data-position="${player.position}"]`);
+            if (!cell) return;
+            
+            // Create a token element
+            const token = document.createElement('div');
+            token.className = `player-token ${index === this.currentPlayer ? 'current-player' : ''}`;
+            token.style.backgroundColor = player.color;
+            
+            // If this is the current player, add their initial inside the token
+            if (index === this.currentPlayer) {
+                token.innerHTML = `<span>${player.name.charAt(0)}</span>`;
+                token.style.zIndex = 100; // Ensure current player is on top
+            } else {
+                token.style.zIndex = 50 + index; // Stack non-current players with consistent z-index
+            }
+            
+            cell.appendChild(token);
+        });
+    }
+
     movePlayer(roll) {
         const currentPlayer = this.players[this.currentPlayer];
         const newPosition = currentPlayer.position + roll;
@@ -141,12 +377,18 @@ class Game {
 
         currentPlayer.moveTo(newPosition);
         this.updatePlayerPosition(currentPlayer);
+        
+        // Update player stats
+        this.playerStats[this.currentPlayer].position = currentPlayer.position;
 
         // Update position display
         const positionDisplay = document.querySelector('.position');
         if (positionDisplay) {
             positionDisplay.textContent = currentPlayer.position;
         }
+
+        // Update player info panel
+        this.updatePlayerInfoPanel();
 
         if (newPosition === 100) {
             this.endGame(currentPlayer);
@@ -159,10 +401,16 @@ class Game {
                 currentPlayer.moveTo(specialMove);
                 this.updatePlayerPosition(currentPlayer);
                 
+                // Update player stats again after special move
+                this.playerStats[this.currentPlayer].position = currentPlayer.position;
+                
                 // Update position display after special move
                 if (positionDisplay) {
                     positionDisplay.textContent = currentPlayer.position;
                 }
+                
+                // Update player info panel again
+                this.updatePlayerInfoPanel();
                 
                 this.nextTurn();
             }, 500);
@@ -171,30 +419,41 @@ class Game {
         }
     }
 
-    updatePlayerPosition(player) {
-        const cells = document.querySelectorAll('.cell');
-        cells.forEach(cell => {
-            cell.classList.remove('player');
-            cell.classList.remove(`player-${player.name.replace(/\s+/g, '-').toLowerCase()}`);
-        });
-        
-        const newCell = document.querySelector(`[data-position="${player.position}"]`);
-        if (newCell) {
-            newCell.classList.add('player');
-            newCell.classList.add(`player-${player.name.replace(/\s+/g, '-').toLowerCase()}`);
-        }
-    }
-
     nextTurn() {
         this.currentPlayer = (this.currentPlayer + 1) % this.players.length;
         this.updateUI();
+        
+        // Update all player tokens to reflect new current player
+        this.updateAllPlayerTokens();
+
+        // Update player cards to show current turn
+        const playerCards = document.querySelectorAll('.player-card');
+        playerCards.forEach((card, index) => {
+            card.classList.remove('active');
+            const badge = card.querySelector('.current-turn-badge');
+            if (badge) badge.remove();
+            
+            if (index === this.currentPlayer) {
+                card.classList.add('active');
+                const header = card.querySelector('.player-card-header');
+                if (header) {
+                    const badge = document.createElement('span');
+                    badge.className = 'current-turn-badge';
+                    badge.textContent = 'Current Turn';
+                    header.appendChild(badge);
+                }
+            }
+        });
+        
+        // Update simplified status display for new player
+        this.updateSimplifiedStatusDisplay();
 
         if (this.players[this.currentPlayer].type === 'bot') {
             setTimeout(() => this.handleRoll(), 1000);
         } else {
-            const rollButton = document.getElementById('roll-dice');
-            if (rollButton) {
-                rollButton.disabled = false;
+            const dice = document.querySelector('.dice');
+            if (dice) {
+                dice.classList.remove('disabled');
             }
         }
     }
@@ -214,6 +473,8 @@ class Game {
         const playerTurn = document.querySelector('.player-turn span');
         if (playerTurn) {
             playerTurn.textContent = `${this.players[this.currentPlayer].name}'s Turn`;
+            playerTurn.style.color = this.players[this.currentPlayer].color;
+            playerTurn.style.fontWeight = 'bold';
         }
     }
 
@@ -224,10 +485,19 @@ class Game {
             this.isGameOver = false;
             
             // Reset players
-            this.players.forEach(player => {
+            this.players.forEach((player, index) => {
                 player.position = 1;
-                this.updatePlayerPosition(player);
+                
+                // Reset player stats
+                this.playerStats[index] = {
+                    name: player.name,
+                    position: 1,
+                    lastRoll: 0
+                };
             });
+            
+            // Update all player tokens
+            this.updateAllPlayerTokens();
             
             // Reset UI
             const rollsDisplay = document.querySelector('.stat span:first-child');
@@ -250,10 +520,13 @@ class Game {
                 diceFace.innerHTML = this.dice.renderDots(1);
             }
             
-            const rollButton = document.getElementById('roll-dice');
-            if (rollButton) {
-                rollButton.disabled = false;
+            const dice = document.querySelector('.dice');
+            if (dice) {
+                dice.classList.remove('disabled');
             }
+            
+            // Update player info panel
+            this.createPlayerInfoPanel();
             
             this.updateUI();
         }

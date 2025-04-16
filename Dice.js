@@ -43,8 +43,14 @@ class Dice {
             return 1;
         }
         
+        // Add active rolling class for visual feedback
+        dice.classList.add('rolling-active');
+        
         // Apply rolling animation to the dice
         dice.style.animation = 'rolling 0.8s ease';
+        
+        // Play dice rolling sound
+        this.playRollSound();
         
         // Animate the dots disappearing during roll
         for (let i = 0; i < 6; i++) {
@@ -62,7 +68,23 @@ class Dice {
         diceFace.innerHTML = this.renderDots(this.value);
         dice.style.animation = '';
         
+        // Remove disabled state
+        dice.classList.remove('disabled');
+        dice.classList.remove('rolling-active');
+        
         this.isRolling = false;
         return this.value;
+    }
+    
+    playRollSound() {
+        // Create and play dice rolling sound
+        try {
+            const audio = new Audio();
+            audio.src = 'https://assets.mixkit.co/active_storage/sfx/2007/2007-preview.mp3';
+            audio.volume = 0.5;
+            audio.play();
+        } catch (e) {
+            console.log('Sound could not be played', e);
+        }
     }
 } 
