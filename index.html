@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="game-wrapper">
+    <div class="game-wrapper" style="display: none;">
         <header>
             <h1 class="game-title">Snake & Ladder Game</h1>
             <div class="game-info">
@@ -17,16 +17,7 @@
                     <i class="fas fa-user"></i>
                     <span>Player 1's Turn</span>
                 </div>
-                <div class="game-stats">
-                    <div class="stat">
-                        <i class="fas fa-dice"></i>
-                        <span>Rolls: 0</span>
-                    </div>
-                    <div class="stat">
-                        <i class="fas fa-clock"></i>
-                        <span>Time: 00:00</span>
-                    </div>
-                </div>
+                
             </div>
         </header>
 
@@ -47,18 +38,15 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn-secondary">
+                    <button id="restart" class="btn-secondary">
                         <i class="fas fa-redo"></i>
                         Restart
                     </button>
-                    <button class="btn-secondary">
-                        <i class="fas fa-pause"></i>
-                        Pause
+                    <button id="home" class="btn-secondary">
+                        <i class="fas fa-home"></i>
+                        Home
                     </button>
-                    <button class="btn-secondary">
-                        <i class="fas fa-cog"></i>
-                        Settings
-                    </button>
+
                 </div>
 
                 <div class="game-status">
@@ -84,6 +72,13 @@
             </ul>
         </div>
     </div>
+    
+    <!-- Game Scripts -->
+    <script src="Board.js"></script>
+    <script src="Dice.js"></script>
+    <script src="Player.js"></script>
+    <script src="Game.js"></script>
+    <script src="menu.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
